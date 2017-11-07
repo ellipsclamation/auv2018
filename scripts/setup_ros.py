@@ -1,6 +1,7 @@
 import os
 import stat
 from subprocess import call
+import getpass
 
 
 def change_permissions(script):
@@ -21,3 +22,8 @@ def install():
     for script in scripts:
         change_permissions(script)
         run_script(script)
+
+    """Add user to the dialout group"""
+    call(['sudo', 'adduser', getpass.getuser(), 'dialout'])
+
+    print('\nPlease restart computer for changes to take effect.')
