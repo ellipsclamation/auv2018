@@ -1,12 +1,26 @@
 """Import line-oriented command interpreter"""
 import cmd
-import rospy
 import subprocess
 import time
 import os
 
-from scripts import setup_ros
-from modules.control.motor import Motor
+"""If ROS is not detected, installs ROS lunar for Ubuntu 17.04."""
+try:
+    import rospy
+    from modules.control.motor import Motor
+except ImportError:
+    import sys
+    from scripts import setup_ros
+
+    print('No ROS detected')
+    response = raw_input(
+                '\nAre you sure you want to do first time setup for ROS? [y/n]: '
+            ).lower()
+    if response == 'y':
+        print('Setting up ROS lunar for Ubuntu 17.04')
+        setup_ros.install()
+
+    sys.exit()
 
 
 class AUV(cmd.Cmd):
@@ -15,27 +29,6 @@ class AUV(cmd.Cmd):
     intro = '\nType help or ? to list commands.'
     prompt = 'auv> '
 
-    # ros_setup
-    def do_setup_ros(self, arg):
-        '\nDo first time setup for ROS. Installs ROS lunar for Ubuntu 17.04. [y/n]'
-
-        response = 'n'
-
-        if arg.lower() != 'y' and arg.lower() != 'n':
-            response = raw_input(
-                '\nAre you sure you want to do first time setup for ROS? [y/n]: '
-            ).lower()
-
-        if arg == 'y' or response == 'y':
-            setup_ros.install()
-
-    def complete_setup_ros(self, text, line, start_index, end_index):
-        args = ['y', 'n']
-
-        if text:
-            return [arg for arg in args if arg.startswith(text)]
-        else:
-            return args
 
     # motor
     def do_motor(self, arg):
