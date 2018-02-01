@@ -7,7 +7,6 @@ import os
 """If ROS is not detected, installs ROS lunar for Ubuntu 17.04."""
 try:
     import rospy
-    from modules.control.motor import Motor
 except ImportError:
     import sys
     from scripts import setup_ros
@@ -21,6 +20,15 @@ except ImportError:
         setup_ros.install()
 
     sys.exit()
+finally:
+    """Import test_movement"""
+    from test import test_movement
+
+    """Import motor"""
+    from modules.control.motor import Motor
+
+    """Import direction"""
+    from modules.control.direction import Direction
 
 
 class AUV(cmd.Cmd):
@@ -29,8 +37,41 @@ class AUV(cmd.Cmd):
     intro = '\nType help or ? to list commands.'
     prompt = 'auv> '
 
+    # test #############################################################################################################
+    def do_test(self, arg):
+        '\n[movement] to test movement\
+         \n[cv] to test cv direction finder'
 
-    # motor
+        if arg.lower() == 'movement':
+            test_movement.main()
+
+    # auto-complete test
+    def complete_test(self, text, line, start_index, end_index):
+        args = ['movement', 'cv']
+
+        if text:
+            return [arg for arg in args if arg.startswith(text)]
+        else:
+            return args
+
+    # tasks ############################################################################################################
+    def do_tasks(self, arg):
+        '\n[view] to view tasks\
+         \n[set] to set tasks list\
+         \n[reset] to reset tasks list'
+
+        print(arg)
+
+    # auto-complete tasks
+    def complete_tasks(self, text, line, start_index, end_index):
+        args = ['view', 'set', 'reset']
+
+        if text:
+            return [arg for arg in args if arg.startswith(text)]
+        else:
+            return args
+
+    # motor ############################################################################################################
     def do_motor(self, arg):
         '\nTurn on or off motors [on/off] or [1/0]\
          \n[toggle] to toggle the current state\
@@ -45,6 +86,7 @@ class AUV(cmd.Cmd):
         else:
             print('\nmotor state: %d' % motor.get_state())
 
+    # auto-complete motor
     def complete_motor(self, text, line, start_index, end_index):
         args = ['on', 'off', 'toggle', 'state']
 
@@ -53,7 +95,27 @@ class AUV(cmd.Cmd):
         else:
             return args
 
-    # exit
+    # direction ########################################################################################################
+    def do_direction(self, arg):
+        '\n[cv] toogle computer vision direction finder\
+         \n[rotation# vertical#] negative# = left/down, positive# = right/up'
+
+        if arg.lower() == 'cv':
+            print(arg)
+        elif len(arg.split()) == 2:
+            direction.set_direction(*parse(arg))
+            direction.move_direction()
+
+    # auto-complete direction
+    def complete_direction(self, text, line, start_index, end_index):
+        args = ['cv']
+
+        if text:
+            return [arg for arg in args if arg.startswith(text)]
+        else:
+            return args
+
+    # exit #############################################################################################################
     def do_exit(self, arg):
         '\nExits auv'
 
@@ -68,11 +130,15 @@ def parse(arg):
 if __name__ == '__main__':
     # open roscore in subprocess
     print('Setting up roscore.')
+    os.system('killall -9 roscore')
+    os.system('killall -9 rosmaster')
+    os.system('killall -9 rosout')
     roscore = subprocess.Popen('roscore')
     time.sleep(1)
 
-    rospy.init_node('AUV', anonymous=True)
+    rospy.init_node('AUV', anonymous=True)  # initialize AUV rosnode
     motor = Motor()  # initialize Motor() class
+    direction = Direction()  # initialize Direction() class
 
     AUV().cmdloop()  # run AUV command interpreter
 

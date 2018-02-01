@@ -5,6 +5,7 @@ from time import sleep
 
 class Motor():
     """Controls motors"""
+
     def __init__(self, state=0):
         self.state = state
 
