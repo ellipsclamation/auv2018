@@ -8,7 +8,7 @@ and python 2.7.13
 ### In terminal:
 - git clone auv2018
 - cd auv2018/
-- python auv.py
+- python robosub.py
 
 ### In the auv program:
 - if ROS has not been installed, it will be installed automatically

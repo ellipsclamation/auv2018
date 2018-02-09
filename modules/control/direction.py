@@ -26,4 +26,4 @@ class Direction():
         sleep(.5)
         pub_rotation.publish(self.rotation)
         pub_vertical.publish(self.z)
-        print('\nmoving AUV to rotation=%d, z=%d' % (self.rotation, self.z))
+        print('moving AUV to rotation=%d, z=%d' % (self.rotation, self.z))

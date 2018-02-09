@@ -25,10 +25,10 @@ class Motor():
         # Toggles the state if there is no argument passed
         if arg is None:
             if self.state == 0:
-                arg = 1
+                self.state = 1
             else:
-                arg = 0
+                self.state = 0
 
         sleep(.5)
-        pub.publish(arg)
-        print('\nmotor state set to %d' % arg)
+        pub.publish(self.state)
+        print('\nmotor state set to %d' % self.state)

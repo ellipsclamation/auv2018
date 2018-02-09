@@ -21,6 +21,11 @@ except ImportError:
 
     sys.exit()
 finally:
+    from std_msgs.msg import Int32
+
+    """Import auv"""
+    from modules.main.auv import AUV
+
     """Import test_movement"""
     from test import test_movement
 
@@ -31,8 +36,8 @@ finally:
     from modules.control.direction import Direction
 
 
-class AUV(cmd.Cmd):
-    """AUV command interpreter"""
+class CLI(cmd.Cmd):
+    """AUV command line interpreter"""
 
     intro = '\nType help or ? to list commands.'
     prompt = 'auv> '
@@ -44,6 +49,8 @@ class AUV(cmd.Cmd):
 
         if arg.lower() == 'movement':
             test_movement.main()
+
+        # TODO finish test
 
     # auto-complete test
     def complete_test(self, text, line, start_index, end_index):
@@ -61,6 +68,7 @@ class AUV(cmd.Cmd):
          \n[reset] to reset tasks list'
 
         print(arg)
+        # TODO tasks
 
     # auto-complete tasks
     def complete_tasks(self, text, line, start_index, end_index):
@@ -127,6 +135,14 @@ def parse(arg):
     return tuple(map(int, arg.split()))
 
 
+def callback(data):
+    # print(data.data)
+    if data.data == 1:
+        AUV.toggle_state(1)
+    if data.data == 0:
+        AUV.toggle_state(0)
+
+
 if __name__ == '__main__':
     # open roscore in subprocess
     print('Setting up roscore.')
@@ -137,10 +153,15 @@ if __name__ == '__main__':
     time.sleep(1)
 
     rospy.init_node('AUV', anonymous=True)  # initialize AUV rosnode
+    AUV = AUV()  # initialize AUV() class
+    AUV.toggle_state()
+
     motor = Motor()  # initialize Motor() class
     direction = Direction()  # initialize Direction() class
 
-    AUV().cmdloop()  # run AUV command interpreter
+    CLI().cmdloop()  # run AUV command interpreter
+
+    rospy.Subscriber('kill_switch', Int32, callback)  # Subscriber for magnet kill switch
 
     # close roscore and rosmaster on exit
     subprocess.Popen.kill(roscore)
