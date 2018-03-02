@@ -26,14 +26,14 @@ finally:
     """Import auv"""
     from modules.main.auv import AUV
 
-    """Import test_movement"""
-    from test import test_movement
+    # """Import test_movement"""
+    # from test import test_movement
 
-    """Import motor"""
-    from modules.control.motor import Motor
+    # """Import motor"""
+    # from modules.control.motor import Motor
 
-    """Import direction"""
-    from modules.control.direction import Direction
+    # """Import direction"""
+    # from modules.control.direction import Direction
 
 
 class CLI(cmd.Cmd):
@@ -67,8 +67,13 @@ class CLI(cmd.Cmd):
          \n[set] to set tasks list\
          \n[reset] to reset tasks list'
 
-        print(arg)
-        # TODO tasks
+        if arg.lower() == 'view':
+            print(AUV.tasks)
+        elif arg.lower() == 'reset':
+            AUV.tasks = ['test', 'fdsdfdsf']
+
+        # TODO set tasks and reset tasks
+        # TODO make a config file for default tasks
 
     # auto-complete tasks
     def complete_tasks(self, text, line, start_index, end_index):
@@ -86,13 +91,13 @@ class CLI(cmd.Cmd):
          \n[state] or no argument to print current state'
 
         if arg.lower() == 'on' or arg == '1':
-            motor.toggle_state(1)
+            AUV.motor.toggle_state(1)
         elif arg.lower() == 'off' or arg == '0':
-            motor.toggle_state(0)
+            AUV.motor.toggle_state(0)
         elif arg.lower() == 'toggle':
-            motor.toggle_state()
+            AUV.motor.toggle_state()
         else:
-            print('\nmotor state: %d' % motor.get_state())
+            print('\nmotor state: %d' % AUV.motor.get_state())
 
     # auto-complete motor
     def complete_motor(self, text, line, start_index, end_index):
@@ -111,8 +116,8 @@ class CLI(cmd.Cmd):
         if arg.lower() == 'cv':
             print(arg)
         elif len(arg.split()) == 2:
-            direction.set_direction(*parse(arg))
-            direction.move_direction()
+            AUV.direction.set_direction(*parse(arg))
+            AUV.direction.point_direction()
 
     # auto-complete direction
     def complete_direction(self, text, line, start_index, end_index):
@@ -138,9 +143,9 @@ def parse(arg):
 def callback(data):
     # print(data.data)
     if data.data == 1:
-        AUV.toggle_state(1)
+        AUV.start()
     if data.data == 0:
-        AUV.toggle_state(0)
+        AUV.stop()
 
 
 if __name__ == '__main__':
@@ -154,10 +159,8 @@ if __name__ == '__main__':
 
     rospy.init_node('AUV', anonymous=True)  # initialize AUV rosnode
     AUV = AUV()  # initialize AUV() class
-    AUV.toggle_state()
 
-    motor = Motor()  # initialize Motor() class
-    direction = Direction()  # initialize Direction() class
+    print('\n***Plug in magnet after setting up configurations to start AUV.***')
 
     CLI().cmdloop()  # run AUV command interpreter
 

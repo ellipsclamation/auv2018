@@ -15,18 +15,16 @@ class AUV():
 
         # self.test
         self.motor = Motor()  # initialize Motor() class
-        self.direction = Direction()  # initialize Direction() class
+        # TODO self.cv = CV() # initialize CV() class
         # TODO construct modules, refactor robosub.py
 
-    def toggle_state(self, arg=None):
-        """Toggles the state of the AUV (1 == on, 0 == off, empty == toggle)"""
+    def start(self):
+        """Starts the modules when magnet killswitch is plugged in"""
 
-        # Toggles the state if there is no argument passed
-        if arg is None:
-            if self.state == 0:
-                self.state = 1
-            else:
-                self.state = 0
+        self.motor.start()
+        # self.cv.start(self.tasks)
 
-        print('state:%d' % self.state)
-        print(self.tasks)
+    def stop(self):
+        """Stops the modules when magnet killswitch is removed"""
+
+        self.motor.stop()
